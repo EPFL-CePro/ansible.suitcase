@@ -273,7 +273,7 @@ See: https://github.com/ansible/ansible/issues/81946
 
 ===================================================================================
 BLACKLISTED_PYTHON
-        3.10*/14.*) warn <<OBSOLETE_PYTHON ; return 1 ;;
+        3.9.*/14.*|3.10.*/14.*) warn <<OBSOLETE_PYTHON ; return 1 ;;
 ===================================================================================
 
 Fatal: Ansible $SUITCASE_ANSIBLE_VERSION requires Python >= 3.12.
@@ -282,7 +282,7 @@ Fatal: Ansible $SUITCASE_ANSIBLE_VERSION requires Python >= 3.12.
 
 ===================================================================================
 OBSOLETE_PYTHON
-        3.15.0/14.5.0) warn <<PYTHON_TOO_SOON ; return 1 ;;
+        3.15.0/14.[45].0) warn <<PYTHON_TOO_SOON ; return 1 ;;
 ===================================================================================
 
 Fatal: Ansible $SUITCASE_ANSIBLE_VERSION fails with Python 3.15.0.
