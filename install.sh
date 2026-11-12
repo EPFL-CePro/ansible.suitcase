@@ -185,7 +185,7 @@ ensure_suitcase_ansible_version_set () {
                 fatal <<'PLEASE_SET_SUITCASE_ANSIBLE_VERSION'
 Please set SUITCASE_ANSIBLE_VERSION upon invoking the suitcase, e.g.
 
-curl https://raw.githubusercontent.com/epfl-si/ansible.suitcase/master/install.sh | \
+curl https://raw.githubusercontent.com/EPFL-CePro/ansible.suitcase/master/install.sh | \
    SUITCASE_ANSIBLE_VERSION=3.4.0 sh -x
       
 PLEASE_SET_SUITCASE_ANSIBLE_VERSION
@@ -828,7 +828,7 @@ ensure_lib_sh () {
 
     local suitcase_dir_quoted
     suitcase_dir_quoted="'"$(echo "$SUITCASE_DIR" | sed "s|\(['/]\)|"'\\\1'"|g")"'"
-    curl https://raw.githubusercontent.com/epfl-si/ansible.suitcase/master/lib.sh |
+    curl https://raw.githubusercontent.com/EPFL-CePro/ansible.suitcase/master/lib.sh |
         sed 's/$SUITCASE_DIR/'"$suitcase_dir_quoted"'/g' > "$SUITCASE_DIR"/lib.sh
     if [ -f "$SUITCASE_DIR"/lib.sh ]; then
         satisfied libsh
