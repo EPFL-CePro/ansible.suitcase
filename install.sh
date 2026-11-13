@@ -282,15 +282,6 @@ Fatal: Ansible $SUITCASE_ANSIBLE_VERSION requires Python >= 3.12.
 
 ===================================================================================
 OBSOLETE_PYTHON
-        3.15.0/14.[45].0) warn <<PYTHON_TOO_SOON ; return 1 ;;
-===================================================================================
-
-Fatal: Ansible $SUITCASE_ANSIBLE_VERSION fails with Python 3.15.0.
-
-Bug report to follow later, maybe.
-
-===================================================================================
-PYTHON_TOO_SOON
     esac
     return 0
 }
@@ -463,6 +454,18 @@ ensure_pip_deps () {
     # preferring binaries affords the suitcase a chance to work on
     # workstations without OpenSSL's development kit.
     ensure_pip_dep pyOpenSSL -U --prefer-binary
+
+    # https://github.com/ansible/ansible/issues/87081
+    local python_version="$("$SUITCASE_DIR/bin/python3" --version | sed 's/Python //')"
+    case "$python_version/$SUITCASE_ANSIBLE_VERSION" in
+        3.15.0/14.[456].0)
+            ensure_pip_dep "ansible-core~=2.22.0" -U --prefer-binary
+            # Sure enough, Pip will complain that ansible-core~=2.22.0
+            # doesn't go with ansible==14.6.0 or whatever, but it will
+            # still do as it's told so I guess I can't complain too
+            # much.
+            ;;
+    esac
 
     for dep in $SUITCASE_PIP_EXTRA; do
         case "$dep" in
