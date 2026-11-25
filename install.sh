@@ -44,6 +44,12 @@
 # $SUITCASE_HELM_VERSION          The version of Helm to use if SUITCASE_WITH_HELM=1.
 #                                 By default, install the latest release in major version 3.
 #
+# $SUITCASE_HELM_DIFF_VERSION     The version of the "diff" plugin
+#                                 (https://github.com/databus23/helm-diff)
+#                                 to install into the suitcase's Helm
+#                                 data home if SUITCASE_WITH_HELM=1. By
+#                                 default, install the latest release.
+#
 # $SUITCASE_WITH_KUBECTL          1 means to install the kubectl
 #                                 command-line tool. 0 (the default)
 #                                 means your project doesn't require
@@ -129,6 +135,7 @@ main () {
 
     if [ "$SUITCASE_WITH_HELM" != 0 ]; then
         ensure_helm || unsatisfied helm
+        ensure_helm_diff || unsatisfied helm_diff
     fi
     if [ "$SUITCASE_WITH_KUBECTL" != 0 ]; then
         ensure_kubectl || unsatisfied kubectl
@@ -865,6 +872,43 @@ exec "$SUITCASE_DIR/helm/helm" "\$@"
 
 HELM_SHIM
     chmod a+x "$SUITCASE_DIR"/bin/helm
+}
+
+ensure_helm_diff () {
+    local plugin_dir="$SUITCASE_DIR/helm/plugins/diff"
+    ensure_dir "$SUITCASE_DIR/helm/plugins"
+
+    local diff_os="$(uname -s | tr 'A-Z' 'a-z')"
+    case "$diff_os" in
+        darwin) diff_os=macos ;;
+        mingw*|msys*|cygwin*) diff_os=windows ;;
+    esac
+    local diff_arch="$(uname -m)"
+    case "$diff_arch" in
+        x86_64) diff_arch=amd64 ;;
+        aarch64) diff_arch=arm64 ;;
+        armv6*) diff_arch=armv6 ;;
+        armv7*) diff_arch=armv7 ;;
+    esac
+
+    local version
+    if [ -n "$SUITCASE_HELM_DIFF_VERSION" ]; then
+        version="v${SUITCASE_HELM_DIFF_VERSION#v}"
+    else
+        version="latest"
+    fi
+
+    local tmp_dir="$SUITCASE_DIR/.helm-diff.tmp"
+    rm -rf "$tmp_dir"
+    ensure_dir "$tmp_dir"
+    curl -sSfL -o "$tmp_dir/helm-diff.tgz" "https://github.com/databus23/helm-diff/releases/$version/download/helm-diff-$diff_os-$diff_arch.tgz"
+    tar xzf "$tmp_dir/helm-diff.tgz" -C "$tmp_dir"
+
+    rm -rf "$plugin_dir"
+    mv "$tmp_dir"/*/ "$plugin_dir"
+    rm -rf "$tmp_dir"
+
+    check_version helm_diff "$(sed -E -n 's/^version: *"?([^"]*)"?.*$/\1/p' "$plugin_dir/plugin.yaml")"
 }
 
 ensure_kubectl () {
